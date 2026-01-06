@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Terminal, Shield, Cpu, Globe, ArrowRight, Activity } from "lucide-react";
 import { Streamdown } from 'streamdown';
@@ -39,12 +40,16 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-            <Button size="lg" className="font-mono text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90 border-none rounded-none skew-x-[-10deg]">
-              <span className="skew-x-[10deg]">INITIATE PROTOCOL</span>
-            </Button>
-            <Button size="lg" variant="outline" className="font-mono text-lg px-8 py-6 border-primary text-primary hover:bg-primary/10 rounded-none skew-x-[-10deg]">
-              <span className="skew-x-[10deg]">READ MANIFESTO</span>
-            </Button>
+            <Link href="/dashboard">
+              <Button size="lg" className="font-mono text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90 border-none rounded-none skew-x-[-10deg]">
+                <span className="skew-x-[10deg]">INITIATE PROTOCOL</span>
+              </Button>
+            </Link>
+            <Link href="/manifesto">
+              <Button size="lg" variant="outline" className="font-mono text-lg px-8 py-6 border-primary text-primary hover:bg-primary/10 rounded-none skew-x-[-10deg]">
+                <span className="skew-x-[10deg]">READ MANIFESTO</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -214,9 +219,11 @@ export default function Home() {
                   This document exists for that purpose.
                 </p>
               </div>
-              <Button variant="link" className="mt-6 text-secondary p-0 h-auto font-mono hover:text-secondary/80 group">
-                ACCESS_FULL_DOCUMENT <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Link href="/manifesto">
+                <Button variant="link" className="mt-6 text-secondary p-0 h-auto font-mono hover:text-secondary/80 group">
+                  ACCESS_FULL_DOCUMENT <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </div>
             <div className="w-full md:w-1/3">
               <div className="aspect-square bg-black border border-border relative overflow-hidden group">
