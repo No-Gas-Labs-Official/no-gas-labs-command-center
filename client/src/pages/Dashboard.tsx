@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Activity, Server, Users, Zap, Database, Network, FileText } from "lucide-react";
+import { ArrowLeft, Activity, Server, Users, Zap, Database, Network, FileText, User } from "lucide-react";
 import { Link } from "wouter";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar, Legend } from "recharts";
 
@@ -106,20 +106,22 @@ export default function Dashboard() {
               </CardContent>
             </Card>
             
-            <Card className="bg-card/50 border-border">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-mono text-muted-foreground">
-                  ARTIFACTS_LOGGED
-                </CardTitle>
-                <Database className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold font-mono">42</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Immutable records
-                </p>
-              </CardContent>
-            </Card>
+            <Link href="/assessment">
+              <Card className="bg-card/50 border-border hover:bg-card/80 transition-colors cursor-pointer group">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium font-mono text-muted-foreground group-hover:text-primary transition-colors">
+                    SUBJECT_ASSESSMENT
+                  </CardTitle>
+                  <User className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold font-mono">LATEST</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Autobio-Social Audit
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           {/* Charts */}
