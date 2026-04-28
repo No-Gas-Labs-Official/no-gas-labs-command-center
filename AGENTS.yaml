@@ -1,0 +1,30 @@
+version: "1.0"
+protocol: "Prometheus and Bob Alignment"
+harness:
+  autonomy_gain: 0.40
+  constraint_step: 0.666
+  relay_mode: "tokenized_relay"
+
+guild:
+  id: "No-Gas-Labs-Official/AI-Guild"
+  access: "AUTHORIZED_FULL_RW"
+  token_ref: "GITHUB_PAT_PROVIDED"
+
+orchestration:
+  active_agent: "Manus"
+  current_phase: "CORE_IMPLEMENTATION"
+  todo_list:
+    - id: "DASHBOARD_UI"
+      task: "Implement platform status UI in Dashboard"
+      status: "IN_PROGRESS"
+    - id: "TAB_INJECTION"
+      task: "Develop tab injection mechanism (extension logic)"
+      status: "TODO"
+    - id: "AI_ROUND_TABLE"
+      task: "Implement AI Round Table interface"
+      status: "TODO"
+
+constraints:
+  - "Maintain Neo-Brutalism / Cybernetic Clarity design language"
+  - "Ensure 100% monospaced font consistency for technical headers"
+  - "Reflect all completion tokens in the relay loop"
