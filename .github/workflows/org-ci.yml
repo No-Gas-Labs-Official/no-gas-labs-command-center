@@ -8,10 +8,10 @@ on:
 
 jobs:
   core:
-    uses: No-Gas-Labs-Official/no-gas-labs-governance/.github/workflows/ci-core.yml@main
+    uses: No-Gas-Labs-Official/no-gas-labs-governance/.github/workflows/ci-core.yml@ef2819948f2f9aca1ecd7ffcc7cfeea4c2f3f9d7
 
   security:
-    uses: No-Gas-Labs-Official/no-gas-labs-governance/.github/workflows/security-core.yml@main
+    uses: No-Gas-Labs-Official/no-gas-labs-governance/.github/workflows/security-core.yml@ef2819948f2f9aca1ecd7ffcc7cfeea4c2f3f9d7
 
   classification:
-    uses: No-Gas-Labs-Official/no-gas-labs-governance/.github/workflows/repo-classification-check.yml@main
+    uses: No-Gas-Labs-Official/no-gas-labs-governance/.github/workflows/repo-classification-check.yml@ef2819948f2f9aca1ecd7ffcc7cfeea4c2f3f9d7
