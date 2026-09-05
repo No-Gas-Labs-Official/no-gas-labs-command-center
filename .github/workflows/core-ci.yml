@@ -35,16 +35,20 @@ jobs:
       # This repo is pnpm-only (pnpm-lock.yaml; no npm/yarn lock file).
       # setup-node hard-fails "Dependencies lock file is not found" when
       # cache:npm is set but no package-lock.json exists.
+      # pnpm must be on PATH BEFORE setup-node's cache step (it runs
+      # `pnpm store path` to locate the store). corepack ships with
+      # Node; `corepack enable` installs the pnpm shim from the
+      # packageManager field in package.json.
+      - name: Setup pnpm via corepack
+        run: |
+          corepack enable
+          COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --version
+
       - name: Setup Node ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
-
-      - name: Setup pnpm via corepack
-        run: |
-          corepack enable
-          COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
