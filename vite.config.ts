@@ -24,6 +24,16 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    // Dev-mode proxy: the React client fetches /api/... paths which are
+    // served by the Express server (server/index.ts), not by Vite. Without
+    // this proxy every dev-mode API call falls through to the SPA fallback
+    // and the UI cannot reach the real node-gate routes.
+    proxy: {
+      "/api": {
+        target: process.env.NODE_GATE_URL || "http://localhost:3001",
+        changeOrigin: true,
+      },
+    },
     port: 3000,
     strictPort: false, // Will find next available port if 3000 is busy
     host: true,
