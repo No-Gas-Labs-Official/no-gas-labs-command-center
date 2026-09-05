@@ -46,6 +46,44 @@ router.post("/intervene", async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/node-gate/orchestrate
+ * Proxy the real provider-backed six-phase orchestration path.
+ */
+router.post("/orchestrate", async (req: Request, res: Response) => {
+  try {
+    const { input, options = {} } = req.body;
+
+    if (!input || typeof input !== "string") {
+      return res.status(400).json({
+        error: "MISSING_INPUT",
+        message: "Input field must be a non-empty string",
+      });
+    }
+
+    const result = await nodeGate.orchestrate({
+      input,
+      options,
+      traceId: res.locals.traceId,
+    });
+    res.json(result);
+  } catch (error) {
+    if (error instanceof NodeGateError) {
+      return res.status(503).json({
+        error: error.code,
+        message: error.message,
+        trace_id: res.locals.traceId,
+      });
+    }
+    console.error("Node-Gate orchestration error", { trace_id: res.locals.traceId, error: error instanceof Error ? error.message : "unknown" });
+    res.status(502).json({
+      error: "NODE_GATE_UNAVAILABLE",
+      message: "Provider-backed orchestration is unavailable",
+      trace_id: res.locals.traceId,
+    });
+  }
+});
+
+/**
  * GET /api/node-gate/health
  * Check Node-Gate health status
  */

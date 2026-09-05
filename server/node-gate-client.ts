@@ -11,6 +11,15 @@ export interface InterventionRequest {
   input: string;
 }
 
+export interface OrchestrationRequest {
+  input: string;
+  options?: {
+    maxPersonas?: number;
+    forceInclude?: string[];
+  };
+  traceId?: string;
+}
+
 export interface InterventionResponse {
   original_signal: string;
   epistemic_tag: "V" | "P" | "S" | "M" | "A" | "UNCLASSIFIED";
@@ -107,6 +116,31 @@ export class NodeGateClient {
     }
 
     return response.json();
+  }
+
+  /** Submit a provider-backed, traceable six-phase orchestration request. */
+  async orchestrate(request: OrchestrationRequest): Promise<Record<string, unknown>> {
+    const response = await fetch(`${this.baseUrl}/v2/orchestrate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(request.traceId ? { "x-trace-id": request.traceId } : {}),
+      },
+      body: JSON.stringify({ input: request.input, options: request.options || {} }),
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new NodeGateError({
+        error: payload.error || "ORCHESTRATION_FAILED",
+        reason: payload.message || "Node-Gate orchestration failed",
+        code: payload.error || "ORCHESTRATION_FAILED",
+        bob_factor_level: 0,
+        recommendation: "Review the trace and provider configuration",
+        timestamp: new Date().toISOString(),
+      });
+    }
+    return payload;
   }
 
   /**
