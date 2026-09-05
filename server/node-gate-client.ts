@@ -82,8 +82,41 @@ export interface BobFactorError {
   timestamp: string;
 }
 
+/**
+ * Response from POST /v2/deliberate — multi-persona council deliberation.
+ * `deliberation` is provider-shaped and carries its own honesty label
+ * (deterministic vs model-backed) from the Node-Gate itself.
+ */
+export interface DeliberationResponse {
+  input: string;
+  council: {
+    personas: string[];
+    primary: string;
+    mode: string;
+    rationale: string;
+  };
+  deliberation: {
+    [key: string]: any;
+  };
+  protocols: any;
+  timestamp: string;
+}
+
+/** Error thrown when the Node-Gate v2 surface rejects or fails a request. */
+export class NodeGateUpstreamError extends Error {
+  public status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "NodeGateUpstreamError";
+    this.status = status;
+  }
+}
+
 export class NodeGateClient {
-  private baseUrl: string;
+  // Public so the capability-health screen can report the configured
+  // upstream URL without re-reading process.env separately.
+  public baseUrl: string;
 
   constructor(baseUrl: string = "http://localhost:3001") {
     this.baseUrl = baseUrl;
@@ -128,6 +161,39 @@ export class NodeGateClient {
    */
   async taxonomy(): Promise<any> {
     const response = await fetch(`${this.baseUrl}/v1/taxonomy`);
+    return response.json();
+  }
+
+  /**
+   * Submit an input for multi-persona council deliberation (Node-Gate v2).
+   *
+   * This is the REAL deliberation engine: the Node-Gate selects a council,
+   * each persona produces a structured response via the configured provider
+   * (or the explicitly-labeled deterministic fallback), challenge exchanges
+   * are executed, and a synthesis is returned. The response labels its own
+   * processing mode — no capability is claimed beyond what it reports.
+   */
+  async deliberate(
+    input: string,
+    persona_ids: string[] = [],
+    max_personas: number = 5
+  ): Promise<DeliberationResponse> {
+    const response = await fetch(`${this.baseUrl}/v2/deliberate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input, persona_ids, max_personas }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as any;
+      throw new NodeGateUpstreamError(
+        body.message || body.error || "Node-Gate rejected the deliberation request",
+        response.status
+      );
+    }
+
     return response.json();
   }
 }

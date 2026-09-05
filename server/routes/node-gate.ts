@@ -6,7 +6,7 @@
  */
 
 import { Router, Request, Response } from "express";
-import { nodeGate, NodeGateError } from "../node-gate-client";
+import { nodeGate, NodeGateError, NodeGateUpstreamError } from "../node-gate-client";
 
 const router = Router();
 
@@ -73,6 +73,53 @@ router.get("/taxonomy", async (_req: Request, res: Response) => {
     res.status(503).json({
       error: "NODE_GATE_UNAVAILABLE",
       message: "Failed to retrieve taxonomy",
+    });
+  }
+});
+
+/**
+ * POST /api/node-gate/deliberate
+ * Proxy multi-persona council deliberation to Node-Gate v2.
+ *
+ * Forwards the REAL deliberation engine — persona selection, structured
+ * responses, executed challenge exchanges, and synthesis. The Node-Gate
+ * labels the processing mode in the response (deterministic vs
+ * model-backed); we surface that label rather than claiming one.
+ */
+router.post("/deliberate", async (req: Request, res: Response) => {
+  try {
+    const { input, persona_ids = [], max_personas = 5 } = req.body;
+
+    if (!input || typeof input !== "string") {
+      return res.status(400).json({
+        error: "MISSING_INPUT",
+        message: "Input field is required (non-empty string)",
+      });
+    }
+
+    const result = await nodeGate.deliberate(input, persona_ids, max_personas);
+    res.json(result);
+  } catch (error) {
+    if (error instanceof NodeGateUpstreamError) {
+      return res.status(error.status).json({
+        error: "NODE_GATE_REJECTED",
+        message: error.message,
+      });
+    }
+
+    if (error instanceof NodeGateError) {
+      return res.status(422).json({
+        error: error.code,
+        message: error.message,
+        bob_factor_level: error.bobFactorLevel,
+        recommendation: error.recommendation,
+      });
+    }
+
+    console.error("Node-Gate deliberation error:", error);
+    res.status(500).json({
+      error: "NODE_GATE_UNAVAILABLE",
+      message: "Failed to connect to Node-Gate",
     });
   }
 });
