@@ -117,8 +117,8 @@ export default function Dashboard() {
                   </div>
                 ) : capabilities.length === 0 ? (
                   <div className="font-mono text-sm text-destructive">
-                    No capabilities reachable. Start Node-Gate and confirm
-                    NODE_GATE_URL, then reload.
+                    No capabilities reachable. Start Node-Gate and EvidenceOS,
+                    confirm NODE_GATE_URL and EVIDENCEOS_URL, then reload.
                   </div>
                 ) : (
                   <div className="space-y-3">
