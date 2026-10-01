@@ -1,0 +1,42 @@
+name: Zero-Cost Media Factory
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "Title rendered into the video"
+        required: false
+        default: "NO_GAS_LABS // EXECUTION RECEIPT"
+      body:
+        description: "Body rendered into the video"
+        required: false
+        default: "A claim is not evidence. This artifact was compiled by a GitHub runner."
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deterministic media compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Compile vertical MP4 and evidence receipt
+        run: |
+          chmod +x scripts/build-ngl-media.sh
+          scripts/build-ngl-media.sh "${{ inputs.title }}" "${{ inputs.body }}"
+      - name: Inspect outputs
+        run: |
+          test -s out/ngl-short.mp4
+          test -s out/receipt.json
+          cat out/receipt.json
+      - name: Upload build evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ngl-media-build
+          path: out/
+          retention-days: 1
