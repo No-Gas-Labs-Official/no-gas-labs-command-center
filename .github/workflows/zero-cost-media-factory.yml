@@ -1,6 +1,10 @@
 name: Zero-Cost Media Factory
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/zero-cost-media-factory.yml"
+      - "scripts/build-ngl-media.sh"
   workflow_dispatch:
     inputs:
       title:
