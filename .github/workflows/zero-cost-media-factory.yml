@@ -15,10 +15,6 @@ on:
         description: "Body rendered into the video"
         required: false
         default: "A claim is not evidence. This artifact was compiled by a GitHub runner."
-  pull_request:
-    paths:
-      - ".github/workflows/zero-cost-media-factory.yml"
-      - "scripts/build-ngl-media.sh"
 
 permissions:
   contents: read
