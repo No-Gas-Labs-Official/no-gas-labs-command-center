@@ -10,7 +10,7 @@ BOOT SEQUENCE — MANDATORY FIRST ACTION:
 → Read `PROGRESS.md`
 → Read `SELF-EVAL.md`
 → Read `NEXT-DIRECTIVE.md`
-→ Confirm the bootstrap script `init_node.sh` exists and is executable
+→ Confirm the bootstrap script `init_node.sh` exists, then run it with `bash init_node.sh`; require direct execution only after independently verifying Git mode `100755`
 → Confirm: "State read complete. I am operational."
 
 ── LAYER 2: INTENT ────────────────────
