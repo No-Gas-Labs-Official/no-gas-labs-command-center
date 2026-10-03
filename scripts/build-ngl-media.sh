@@ -49,3 +49,5 @@ manifest={
  ]}
 (out/"receipt.json").write_text(json.dumps(manifest,indent=2)+"\n")
 PY
+
+# NGL bounded runtime trigger: canonical state chooses the candidate step.
