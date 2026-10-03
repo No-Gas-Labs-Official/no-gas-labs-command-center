@@ -9,12 +9,14 @@ on:
       - "scripts/build-ngl-media.sh"
       - "scripts/generate-ngl-ad-copy.py"
       - "scripts/verify-and-advance-state.py"
+      - "scripts/test-illegal-state-jump.py"
   pull_request:
     paths:
       - ".github/workflows/zero-cost-media-factory.yml"
       - "scripts/build-ngl-media.sh"
       - "scripts/generate-ngl-ad-copy.py"
       - "scripts/verify-and-advance-state.py"
+      - "scripts/test-illegal-state-jump.py"
       - "ngl/state/runtime.json"
   workflow_dispatch:
     inputs:
@@ -56,6 +58,10 @@ jobs:
               print("has_work=true")
               print(f"next_step={current+1}")
           PY
+
+      - name: Prove illegal state jumps are rejected
+        run: |
+          python3 scripts/test-illegal-state-jump.py
 
       - name: Install deterministic media compiler
         if: steps.state.outputs.has_work == 'true'
