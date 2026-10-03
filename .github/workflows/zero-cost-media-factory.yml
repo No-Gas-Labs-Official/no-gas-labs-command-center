@@ -29,15 +29,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg fonts-dejavu-core
-      - name: Compile vertical MP4 and evidence receipt
+      - name: Compile progressively populated 12-second animation
         run: |
           chmod +x scripts/build-ngl-media.sh
-          scripts/build-ngl-media.sh "${{ inputs.title }}" "${{ inputs.body }}"
+          scripts/build-ngl-media.sh "${{ inputs.title }}" "${{ inputs.body }}" out "${{ github.run_number }}"
       - name: Inspect outputs
         run: |
           test -s out/ngl-short.mp4
           test -s out/receipt.json
-          cat out/receipt.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open("out/receipt.json"))
+          assert r["timeline"]["target_seconds"] == 12
+          assert 1 <= r["timeline"]["populated_seconds"] <= 12
+          print(json.dumps(r, indent=2))
+          PY
       - name: Upload build evidence
         uses: actions/upload-artifact@v4
         with:
