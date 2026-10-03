@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict');
+const {Contact,T}=require('./contact.js');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+ const mock=async()=>({source:'mock://world',establishes:['external_network_reachable'],fact:'mock observation'});
+ const c=new Contact(()=>{},mock);
+ c.ignite();
+ assert.equal(c.events.map(e=>e.type).join(','),'IGNITION,QUESTION');
+ c.answer('A consequential assertion');
+ await sleep(10);
+ assert.deepEqual(c.events.map(e=>e.type),[T.IGNITION,T.QUESTION,T.DAMIEN_ASSERTION,T.DECISION,T.ACTION,T.EXTERNAL_OBSERVATION,T.STATE_CHANGE,T.ARTIFACT,T.QUESTION]);
+ assert.equal(c.events.at(-1).payload.text,'CONTACT reached the outside world. What claim or assumption should it try to falsify first?');
+ assert.equal(JSON.parse(c.export()).capital_deployed,0);
+ const d=new Contact(()=>{},async()=>{throw new Error('offline')});
+ d.ignite(); d.answer('test'); await sleep(10);
+ assert.equal(d.events.some(e=>e.type===T.RESULT&&e.payload.status==='blocked'),true);
+ const e=new Contact(()=>{},mock); e.ignite(); e.interrupt('test stop'); e.answer('ignored'); await sleep(10);
+ assert.equal(e.events.at(-1).type,T.INTERRUPT);
+ console.log('CONTACT 001 deterministic tests: PASS');
+})().catch(e=>{console.error(e);process.exit(1)});
