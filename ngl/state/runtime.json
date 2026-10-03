@@ -1,0 +1,18 @@
+{
+  "schema": "ngl.runtime-state.v0",
+  "experiment_id": "media-animation-001",
+  "status": "READY",
+  "authority": {
+    "owner": "Damien Featherstone",
+    "autonomous_advance_max": 12,
+    "self_authorization": false
+  },
+  "media": {
+    "target_seconds": 12,
+    "populated_seconds": 0,
+    "remaining_seconds": 12,
+    "last_verified_artifact_sha256": null
+  },
+  "next_action": "COMPILE_NEXT_SECOND",
+  "history": []
+}
