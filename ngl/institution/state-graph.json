@@ -48,22 +48,40 @@
       "id": "repo:recursive-artifact-engine",
       "type": "REPOSITORY",
       "label": "recursive-artifact-engine",
-      "state": "DECLARED",
-      "evidence": []
+      "state": "OBSERVED",
+      "evidence": [
+        "github:No-Gas-Labs-Official/recursive-artifact-engine"
+      ],
+      "facts": {
+        "visibility": "public",
+        "default_branch": "main"
+      }
     },
     {
       "id": "repo:ngl-mesh",
       "type": "REPOSITORY",
       "label": "ngl-mesh",
-      "state": "DECLARED",
-      "evidence": []
+      "state": "OBSERVED",
+      "evidence": [
+        "github:No-Gas-Labs-Official/ngl-mesh"
+      ],
+      "facts": {
+        "visibility": "public",
+        "default_branch": "main"
+      }
     },
     {
       "id": "repo:store",
       "type": "REPOSITORY",
       "label": "Store",
-      "state": "DECLARED",
-      "evidence": []
+      "state": "OBSERVED",
+      "evidence": [
+        "github:No-Gas-Labs-Official/Store"
+      ],
+      "facts": {
+        "visibility": "private",
+        "default_branch": "main"
+      }
     },
     {
       "id": "capability:media-render-vertical",
