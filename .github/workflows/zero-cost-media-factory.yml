@@ -1,6 +1,14 @@
 name: Zero-Cost Media Factory
 
 on:
+  push:
+    branches:
+      - "work/zero-cost-media-factory"
+    paths:
+      - ".github/workflows/zero-cost-media-factory.yml"
+      - "scripts/build-ngl-media.sh"
+      - "scripts/generate-ngl-ad-copy.py"
+      - "scripts/verify-and-advance-state.py"
   pull_request:
     paths:
       - ".github/workflows/zero-cost-media-factory.yml"
@@ -77,7 +85,7 @@ jobs:
           python3 scripts/verify-and-advance-state.py             ngl/state/runtime.json             out/receipt.json             out/ad-copy.json             "${{ github.run_id }}"             out/runtime.next.json
 
       - name: Persist verified state transition
-        if: github.event_name == 'workflow_dispatch' && steps.state.outputs.has_work == 'true'
+        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && steps.state.outputs.has_work == 'true'
         shell: bash
         run: |
           cp out/runtime.next.json ngl/state/runtime.json
