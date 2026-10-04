@@ -128,6 +128,52 @@ export interface GateCounselResponse {
   generated_at: string;
 }
 
+
+export interface InstitutionalPetition {
+  schema: "ngl.agp.institutional-petition.v1";
+  id: string;
+  source: {
+    institution: string;
+    council_identity: string;
+    council_size: 25;
+    deliberation_reference: string;
+    counsel_packet_hash: string;
+  };
+  gate_binding: GateCounselResponse["binding"];
+  proposal: {
+    exact_action: string;
+    target: string;
+    permissions: string[];
+    execution_limits: string[];
+    costs: string[];
+    evidence_refs: unknown[];
+    recommendations: unknown[];
+    dissent: unknown[];
+  };
+  execution: {
+    authority: "NONE";
+    executable: false;
+    single_use_execution_id: string;
+    expires_at: number;
+    scope_expansion_allowed: false;
+    founder_ruling_required: true;
+  };
+  created_at: string;
+}
+
+export interface InstitutionalActionDraft {
+  exact_action: string;
+  target: string;
+  permissions?: string[];
+  execution_limits?: string[];
+  costs?: string[];
+  evidence_refs?: unknown[];
+  recommendations?: unknown[];
+  dissent?: unknown[];
+  execution_nonce: string;
+  expires_at: number;
+}
+
 /** Error thrown when the Node-Gate v2 surface rejects or fails a request. */
 export class NodeGateUpstreamError extends Error {
   public status: number;
@@ -238,6 +284,41 @@ export class NodeGateClient {
     }
 
     return response.json();
+  }
+
+  async buildInstitutionalPetition(
+    request: unknown,
+    counsel: GateCounselResponse,
+    action: InstitutionalActionDraft
+  ): Promise<InstitutionalPetition> {
+    if (counsel.authority !== "NONE" || counsel.canonical_effect !== "NONE") {
+      throw new NodeGateUpstreamError("Command Center refuses authoritative council counsel", 400);
+    }
+
+    const response = await fetch(`${this.baseUrl}/v2/gate/petition`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ request, counsel, action }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as any;
+      throw new NodeGateUpstreamError(
+        body.message || body.error || "Node-Gate rejected the institutional petition",
+        response.status
+      );
+    }
+
+    const petition = (await response.json()) as InstitutionalPetition;
+    if (
+      petition.execution.authority !== "NONE" ||
+      petition.execution.executable !== false ||
+      petition.execution.scope_expansion_allowed !== false ||
+      petition.execution.founder_ruling_required !== true
+    ) {
+      throw new NodeGateUpstreamError("Unsafe institutional petition boundary", 502);
+    }
+    return petition;
   }
 
 }
