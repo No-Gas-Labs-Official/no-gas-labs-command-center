@@ -40,3 +40,59 @@ class Contact{
 }
 if(typeof window!=="undefined"){window.Contact=Contact;window.CONTACT_TYPES=T;window.githubPublicObserver=githubPublicObserver}
 if(typeof module!=="undefined"&&module.exports)module.exports={Contact,T,githubPublicObserver};
+
+function projectWorld(events){
+ const world={schema:"ngl.agp.world-projection.v0",phase:"DORMANT",facts:[],pressures:[],artifacts:[],mutations:[]};
+ const bySeq=new Map();
+ const mutate=(kind,event,detail)=>world.mutations.push({kind,event_seq:event.seq,detail});
+ for(const event of Array.isArray(events)?events:[]){
+  if(!event||!Number.isInteger(event.seq)||typeof event.type!=="string") continue;
+  bySeq.set(event.seq,event);
+  if(event.type===T.IGNITION){
+   world.phase="ACTIVE";
+   mutate("WORLD_AWAKENED",event,{basis:"IGNITION"});
+   continue;
+  }
+  if(event.type===T.STATE_CHANGE){
+   const basis=bySeq.get(event.payload&&event.payload.basis);
+   if(!basis||basis.type!==T.EXTERNAL_OBSERVATION){
+    world.pressures.push({kind:"REJECTED_STATE_MUTATION",event_seq:event.seq,reason:"STATE_CHANGE lacks prior EXTERNAL_OBSERVATION basis"});
+    continue;
+   }
+   const added=Array.isArray(event.payload.added)?event.payload.added:[];
+   for(const fact of added){
+    if(typeof fact!=="string"||!fact) continue;
+    if(!world.facts.some(x=>x.value===fact)){
+     world.facts.push({value:fact,event_seq:event.seq,evidence_event_seq:basis.seq});
+     mutate("FACT_ADMITTED",event,{value:fact,evidence_event_seq:basis.seq});
+    }
+   }
+   continue;
+  }
+  if(event.type===T.CONTRADICTION||(event.type===T.RESULT&&event.payload&&event.payload.status==="blocked")){
+   const pressure={kind:event.type,event_seq:event.seq,payload:event.payload||{}};
+   world.pressures.push(pressure);
+   mutate("PRESSURE_PRESERVED",event,{kind:pressure.kind});
+   continue;
+  }
+  if(event.type===T.ARTIFACT){
+   const refs=Array.isArray(event.payload&&event.payload.derived_from)?event.payload.derived_from:[];
+   const valid=refs.length>0&&refs.every(seq=>bySeq.has(seq)&&seq<event.seq);
+   if(!valid){
+    world.pressures.push({kind:"REJECTED_ARTIFACT",event_seq:event.seq,reason:"ARTIFACT derivation is missing or references unavailable/future events"});
+    continue;
+   }
+   const artifact={name:event.payload.name||"unnamed",event_seq:event.seq,derived_from:refs.slice()};
+   world.artifacts.push(artifact);
+   mutate("ARTIFACT_ENTERED_WORLD",event,artifact);
+   continue;
+  }
+  if(event.type===T.INTERRUPT){
+   world.phase="INTERRUPTED";
+   mutate("WORLD_INTERRUPTED",event,{authority:event.payload&&event.payload.authority||"unknown"});
+  }
+ }
+ return world;
+}
+if(typeof window!=="undefined")window.projectAgpWorld=projectWorld;
+if(typeof module!=="undefined"&&module.exports)module.exports.projectWorld=projectWorld;
