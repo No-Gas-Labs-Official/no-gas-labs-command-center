@@ -124,4 +124,72 @@ router.post("/deliberate", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * POST /api/node-gate/gate-counsel
+ * Proxy an exact AGP decision request to the 25-persona Guild.
+ * Advisory only: this path has no authority to sign or mutate AGP state.
+ */
+router.post("/gate-counsel", async (req: Request, res: Response) => {
+  try {
+    const { request, question = "" } = req.body || {};
+    if (!request || typeof request !== "object") {
+      return res.status(400).json({
+        error: "MISSING_GATE_REQUEST",
+        message: "Exact AGP gate request object is required",
+      });
+    }
+
+    const result = await nodeGate.counselGate(request, typeof question === "string" ? question : "");
+    res.json(result);
+  } catch (error) {
+    if (error instanceof NodeGateUpstreamError) {
+      return res.status(error.status).json({
+        error: "NODE_GATE_REJECTED",
+        message: error.message,
+      });
+    }
+
+    console.error("Node-Gate gate-counsel error:", error);
+    res.status(500).json({
+      error: "NODE_GATE_UNAVAILABLE",
+      message: "Failed to consult the 25-persona Guild",
+    });
+  }
+});
+
+
+/**
+ * POST /api/node-gate/gate-petition
+ * Freeze counsel into a non-executable, exact-action institutional petition.
+ * This endpoint deliberately stops before founder authorization.
+ */
+router.post("/gate-petition", async (req: Request, res: Response) => {
+  try {
+    const { request, counsel, action } = req.body || {};
+    if (!request || typeof request !== "object" || !counsel || typeof counsel !== "object" || !action || typeof action !== "object") {
+      return res.status(400).json({
+        error: "MISSING_PETITION_INPUT",
+        message: "Exact request, counsel packet, and bounded action are required",
+      });
+    }
+
+    const petition = await nodeGate.buildInstitutionalPetition(request, counsel, action);
+    res.json({
+      petition,
+      next_boundary: {
+        surface: "AGP / TownSquare Decision Chamber",
+        founder_ruling_required: true,
+        automatic_forwarding: false,
+        reason: "Decision Chamber ingestion contract has not been independently inspected in this repository."
+      }
+    });
+  } catch (error) {
+    if (error instanceof NodeGateUpstreamError) {
+      return res.status(error.status).json({ error: "PETITION_REJECTED", message: error.message });
+    }
+    console.error("Node-Gate gate-petition error:", error);
+    res.status(500).json({ error: "NODE_GATE_UNAVAILABLE", message: "Failed to freeze institutional petition" });
+  }
+});
+
 export default router;
