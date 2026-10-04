@@ -102,6 +102,32 @@ export interface DeliberationResponse {
   timestamp: string;
 }
 
+export interface GateCounselResponse {
+  schema: "ngl.agp.guild-counsel.v1";
+  advisory_only: true;
+  authority: "NONE";
+  canonical_effect: "NONE";
+  binding: {
+    request_digest: string;
+    candidate_id: string;
+    verification_id: string;
+    previous_record_hash: string;
+    previous_event_hash: string;
+    genesis_hash: string;
+    proposed_outcome: string | null;
+    proposed_reason: string | null;
+    factuality: string | null;
+    subject: string | null;
+  };
+  guild: {
+    expected_personas: number;
+    consulted_personas: Array<{ id: string; name: string; tier: string }>;
+  };
+  deliberation: any;
+  protocols: any;
+  generated_at: string;
+}
+
 /** Error thrown when the Node-Gate v2 surface rejects or fails a request. */
 export class NodeGateUpstreamError extends Error {
   public status: number;
@@ -196,6 +222,24 @@ export class NodeGateClient {
 
     return response.json();
   }
+  async counselGate(request: unknown, question: string = ""): Promise<GateCounselResponse> {
+    const response = await fetch(`${this.baseUrl}/v2/gate/counsel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ request, question }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as any;
+      throw new NodeGateUpstreamError(
+        body.message || body.error || "Node-Gate rejected the gate counsel request",
+        response.status
+      );
+    }
+
+    return response.json();
+  }
+
 }
 
 export class NodeGateError extends Error {
